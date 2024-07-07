@@ -1,36 +1,52 @@
 package com.practicesoftwaretesting;
 
+import com.practicesoftwaretesting.cart.asserts.CartDetailsAsserts;
+import com.practicesoftwaretesting.cart.asserts.CreateCartResponseAsserts;
+import com.practicesoftwaretesting.cart.asserts.UpdateCartResponseAsserts;
 import com.practicesoftwaretesting.cart.controller.CartController;
-import com.practicesoftwaretesting.cart.model.*;
+import com.practicesoftwaretesting.cart.model.AddCartItemRequest;
+import com.practicesoftwaretesting.product.controller.ProductController;
+import com.practicesoftwaretesting.product.model.ProductsFilterRequest;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
 class CartTest extends BaseTest {
-
-    private static final String PRODUCT_ID = "01J1MG8J9KJZ74CP29SXJA7385";
-
     CartController cartController = new CartController();
+    ProductController productController = new ProductController();
+    private String productId;
+
+    @BeforeEach
+    void setUp() {
+        productId = productController
+                .getProducts(ProductsFilterRequest.builder().page(1).build())
+                .as()
+                .getData()
+                .getFirst()
+                .getId();
+    }
 
     @Test
     void createUpdateAndDeleteCart() {
-        var createdCart = cartController.createCart()
-                .as(CreateCartResponse.class);
-        assertNotNull(createdCart.getId());
+        var cart = cartController.createCart()
+                .assertStatusCode(201)
+                .as();
+        new CreateCartResponseAsserts(cart)
+                .idIsNotNull();
 
-        var cartId = createdCart.getId();
-        var updateCartResponse = cartController.addItemToCart(cartId, new AddCartItemRequest(PRODUCT_ID, 1))
-                .as(UpdateCartResponse.class);
-        assertNotNull(updateCartResponse.getResult());
+        var cartId = cart.getId();
+        var updateCartResponse = cartController.addItemToCart(cartId, new AddCartItemRequest(productId, 1))
+                .assertStatusCode(200)
+                .as();
+        new UpdateCartResponseAsserts(updateCartResponse)
+                .hasGoodResult();
 
         var cartDetails = cartController.getCart(cartId)
-                .as(CartDetails.class);
-        var productIds = cartDetails.getCartItems().stream().map(CartItem::getProductId).toList();
-        assertTrue(productIds.contains(PRODUCT_ID));
+                .assertStatusCode(200)
+                .as();
+        new CartDetailsAsserts(cartDetails)
+                .containsProduct(productId);
 
         cartController.deleteCart(cartId)
-                .then()
-                .statusCode(204);
+                .assertStatusCode(204);
     }
 }

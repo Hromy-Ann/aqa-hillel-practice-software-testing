@@ -10,6 +10,9 @@ import io.restassured.config.RestAssuredConfig;
 import io.restassured.filter.log.LogDetail;
 
 public abstract class BaseTest {
+    protected static final String ADMIN_EMAIL = "admin@practicesoftwaretesting.com";
+    protected static final String ADMIN_PASSWORD = "welcome01";
+
     static {
         RestAssured.requestSpecification = new RequestSpecBuilder()
                 .log(LogDetail.ALL)

@@ -1,34 +1,43 @@
 package com.practicesoftwaretesting.user.controller;
 
 import com.practicesoftwaretesting.common.BaseController;
+import com.practicesoftwaretesting.common.ResponseDecorator;
 import com.practicesoftwaretesting.user.model.LoginRequest;
+import com.practicesoftwaretesting.user.model.LoginResponse;
 import com.practicesoftwaretesting.user.model.RegisterUserRequest;
-import io.restassured.response.Response;
+import com.practicesoftwaretesting.user.model.RegisterUserResponse;
 
 public class UserController extends BaseController {
 
-    public Response registerUser(RegisterUserRequest registerUserRequest) {
-        return baseClient()
-                .body(registerUserRequest)
-                .post("/users/register");
+    public ResponseDecorator<RegisterUserResponse> registerUser(RegisterUserRequest registerUserRequest) {
+        return new ResponseDecorator<>(
+                baseClient()
+                        .body(registerUserRequest)
+                        .post("/users/register"),
+                RegisterUserResponse.class);
     }
 
-    public Response loginUser(LoginRequest loginRequest) {
-        return baseClient()
-                .body(loginRequest)
-                .post("/users/login");
+    public ResponseDecorator<LoginResponse> loginUser(LoginRequest loginRequest) {
+        return new ResponseDecorator<>(
+                baseClient()
+                        .body(loginRequest)
+                        .post("/users/login"),
+                LoginResponse.class);
     }
 
-    public Response getCurrentUser(String userToken) {
-        return baseClient()
-                .header("Authorization", "Bearer " + userToken)
-                .when()
-                .get("/users/me");
+    public ResponseDecorator<RegisterUserResponse> getCurrentUser(String token) {
+        return new ResponseDecorator<>(
+                baseClient()
+                        .header("Authorization", "Bearer " + token)
+                        .get("/users/me"),
+                RegisterUserResponse.class);
     }
 
-    public Response deleteUser(String userId, String token) {
-        return baseClient()
-                .header("Authorization", "Bearer " + token)
-                .delete("users/" + userId);
+    public ResponseDecorator<Void> deleteUser(String userId, String token) {
+        return new ResponseDecorator<>(
+                baseClient()
+                        .header("Authorization", "Bearer " + token)
+                        .delete("users/" + userId),
+                Void.class);
     }
 }
