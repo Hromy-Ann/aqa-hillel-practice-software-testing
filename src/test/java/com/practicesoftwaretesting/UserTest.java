@@ -1,13 +1,12 @@
 package com.practicesoftwaretesting;
 
+import com.practicesoftwaretesting.user.asserts.GetUserResponseAsserts;
+import com.practicesoftwaretesting.user.asserts.LoginResponseAsserts;
+import com.practicesoftwaretesting.user.asserts.RegisterUserResponseAsserts;
 import com.practicesoftwaretesting.user.controller.UserController;
 import com.practicesoftwaretesting.user.model.LoginRequest;
-import com.practicesoftwaretesting.user.model.LoginResponse;
 import com.practicesoftwaretesting.user.model.RegisterUserRequest;
-import com.practicesoftwaretesting.user.model.RegisterUserResponse;
 import org.junit.jupiter.api.Test;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class UserTest extends BaseTest {
     private static final String PASSWORD = "23Pass!word#";
@@ -18,25 +17,59 @@ class UserTest extends BaseTest {
     @Test
     void testUser() {
         var registerUserRequest = buildUser();
-        var registerUserResponse = userController.registerUser(registerUserRequest)
-                .as(RegisterUserResponse.class);
+        var registeredUser = userController.registerUser(registerUserRequest)
+                .assertStatusCode(201)
+                .as();
+        new RegisterUserResponseAsserts(registeredUser)
+                .idIsNotNull()
+                .firstNameIs(registerUserRequest.getFirstName())
+                .firstNameIs(registerUserRequest.getFirstName())
+                .lastNameIs(registerUserRequest.getLastName())
+                .addressIs(registerUserRequest.getAddress())
+                .cityIs(registerUserRequest.getCity())
+                .stateIs(registerUserRequest.getState())
+                .countryIs(registerUserRequest.getCountry())
+                .postCodeIs(registerUserRequest.getPostcode())
+                .phoneIs(registerUserRequest.getPhone())
+                .dobIs(registerUserRequest.getDob())
+                .emailIs(registerUserRequest.getEmail())
+                .createdAtIsNotNull();
+
         var loginRequestBody = new LoginRequest(EMAIL, PASSWORD);
         var userLoginResponse = userController.loginUser(loginRequestBody)
-                .as(LoginResponse.class);
-        var userToken = userLoginResponse.getAccessToken();
-        var getUserResponse = userController.getCurrentUser(userToken)
-                .as(RegisterUserResponse.class);
+                .assertStatusCode(200)
+                .as();
+        new LoginResponseAsserts(userLoginResponse)
+                .tokenIsNotNull()
+                .tokenIsNotExpired()
+                .tokenTypeIsBearer();
 
-        assertEquals(registerUserResponse.getId(), getUserResponse.getId());
-        var adminLoginRequestBody = new LoginRequest("admin@practicesoftwaretesting.com", "welcome01");
+        var userToken = userLoginResponse.getAccessToken();
+        var getUserResponse = userController
+                .getCurrentUser(userToken)
+                .as();
+        new GetUserResponseAsserts(getUserResponse)
+                .idIs(registeredUser.getId())
+                .firstNameIs(registeredUser.getFirstName())
+                .lastNameIs(registeredUser.getLastName())
+                .addressIs(registeredUser.getAddress())
+                .cityIs(registeredUser.getCity())
+                .stateIs(registeredUser.getState())
+                .countryIs(registeredUser.getCountry())
+                .postCodeIs(registeredUser.getPostcode())
+                .phoneIs(registeredUser.getPhone())
+                .dobIs(registeredUser.getDob())
+                .emailIs(registeredUser.getEmail())
+                .createdAtIs(registeredUser.getCreatedAt());
+
+        var adminLoginRequestBody = new LoginRequest(ADMIN_EMAIL, ADMIN_PASSWORD);
         var adminloginResponse = userController.loginUser(adminLoginRequestBody)
-                .as(LoginResponse.class);
+                .as();
 
         var userId = getUserResponse.getId();
         var token = adminloginResponse.getAccessToken();
         userController.deleteUser(userId, token)
-                .then()
-                .statusCode(204);
+                .assertStatusCode(204);
     }
 
     private RegisterUserRequest buildUser() {
