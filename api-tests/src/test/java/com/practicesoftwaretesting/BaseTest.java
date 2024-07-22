@@ -2,6 +2,8 @@ package com.practicesoftwaretesting;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
+import com.practicesoftwaretesting.user.UserSteps;
+import com.practicesoftwaretesting.utils.ConfigReader;
 import io.restassured.RestAssured;
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.builder.ResponseSpecBuilder;
@@ -10,8 +12,11 @@ import io.restassured.config.RestAssuredConfig;
 import io.restassured.filter.log.LogDetail;
 
 public abstract class BaseTest {
-    protected static final String ADMIN_EMAIL = "admin@practicesoftwaretesting.com";
-    protected static final String ADMIN_PASSWORD = "welcome01";
+    ConfigReader configReader = new ConfigReader();
+    String adminEmail = configReader.getProperty("admin.email");
+    String adminPassword = configReader.getProperty("admin.password");
+    String defaultPassword = configReader.getProperty("default.password");
+    UserSteps userSteps = new UserSteps();
 
     static {
         RestAssured.requestSpecification = new RequestSpecBuilder()
@@ -28,5 +33,17 @@ public abstract class BaseTest {
                                     return objectMapper;
                                 }
                         ));
+    }
+
+    public String registerUser(String userEmail, String password) {
+        return userSteps.registerUser(userEmail, password);
+    }
+
+    public String loginUser(String userEmail, String password) {
+        return userSteps.loginUser(userEmail, password);
+    }
+
+    public String loginAsAdmin() {
+        return loginUser(adminEmail, adminPassword);
     }
 }

@@ -62,13 +62,13 @@ class UserTest extends BaseTest {
                 .emailIs(registeredUser.getEmail())
                 .createdAtIs(registeredUser.getCreatedAt());
 
-        var adminLoginRequestBody = new LoginRequest(ADMIN_EMAIL, ADMIN_PASSWORD);
+        var adminLoginRequestBody = new LoginRequest(adminEmail, adminPassword);
         var adminloginResponse = userController.loginUser(adminLoginRequestBody)
                 .as();
 
         var userId = getUserResponse.getId();
         var token = adminloginResponse.getAccessToken();
-        userController.deleteUser(userId, token)
+        userController.withToken(token).deleteUser(userId)
                 .assertStatusCode(204);
     }
 

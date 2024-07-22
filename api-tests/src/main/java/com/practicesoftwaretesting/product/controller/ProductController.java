@@ -5,7 +5,7 @@ import com.practicesoftwaretesting.common.ResponseDecorator;
 import com.practicesoftwaretesting.product.model.ProductsFilterRequest;
 import com.practicesoftwaretesting.product.model.ProductsResponse;
 
-public class ProductController extends BaseController {
+public class ProductController extends BaseController<ProductController> {
     public ResponseDecorator<ProductsResponse> getProducts(ProductsFilterRequest filter) {
         return new ResponseDecorator<>(
                 baseClient()

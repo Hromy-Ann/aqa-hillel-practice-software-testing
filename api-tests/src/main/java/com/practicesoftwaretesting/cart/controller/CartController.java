@@ -7,7 +7,7 @@ import com.practicesoftwaretesting.cart.model.UpdateCartResponse;
 import com.practicesoftwaretesting.common.BaseController;
 import com.practicesoftwaretesting.common.ResponseDecorator;
 
-public class CartController extends BaseController {
+public class CartController extends BaseController<CartController> {
 
     public ResponseDecorator<CreateCartResponse> createCart() {
         return new ResponseDecorator<>(

@@ -11,6 +11,7 @@
     <modules>
         <module>ui-tests</module>
         <module>api-tests</module>
+        <module>common</module>
     </modules>
 
     <properties>
@@ -54,6 +55,11 @@
                 <groupId>com.codeborne</groupId>
                 <artifactId>selenide</artifactId>
                 <version>${selenide.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.practicesoftwaretesting</groupId>
+                <artifactId>common</artifactId>
+                <version>${project.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
